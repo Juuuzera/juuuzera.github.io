@@ -1,0 +1,23 @@
+name: Checagem basica
+on: [push]
+
+jobs:
+  checar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar os arquivos do repositorio
+        uses: actions/checkout@v7
+
+      - name: Listar os arquivos
+        run: ls -la
+
+      - name: Garantir que o index.html existe
+        run: test -f index.html
+
+      - name: Proibir a palavra TODO na pagina
+        run: |
+          if grep -qi "TODO" index.html; then
+            echo "Achei a palavra TODO no index.html"
+            exit 1
+          fi
+          echo "Nenhum TODO encontrado"
