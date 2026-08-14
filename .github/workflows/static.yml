@@ -15,15 +15,31 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
+  # NOVO: a checagem virou portao. Se este job falhar, o deploy nem comeca.
+  checar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar os arquivos do repositorio
+        uses: actions/checkout@v4
+
+      - name: Garantir que o index.html existe
+        run: test -f index.html
+
+      - name: Proibir a palavra TODO na pagina
+        run: |
+          if grep -qi "TODO" index.html; then
+            echo "Achei a palavra TODO no index.html"
+            exit 1
+          fi
+          echo "Nenhum TODO encontrado"
+
   deploy:
+    needs: checar          # <-- A LINHA QUE MUDA TUDO
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
